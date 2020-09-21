@@ -16,17 +16,8 @@
 package com.amazonaws.services.iot.client.shadow;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.amazonaws.services.iot.client.AWSIotConfig;
 import com.amazonaws.services.iot.client.AWSIotDevice;
@@ -37,53 +28,116 @@ import com.amazonaws.services.iot.client.AWSIotQos;
 import com.amazonaws.services.iot.client.AWSIotTimeoutException;
 import com.amazonaws.services.iot.client.AWSIotTopic;
 import com.amazonaws.services.iot.client.core.AbstractAwsIotClient;
+import com.amazonaws.services.iot.client.logging.Level;
+import com.amazonaws.services.iot.client.logging.Logger;
 import com.amazonaws.services.iot.client.shadow.AwsIotDeviceCommandManager.Command;
 import com.amazonaws.services.iot.client.shadow.AwsIotDeviceCommandManager.CommandAck;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
-import lombok.Getter;
-import lombok.Setter;
+import com.joshvm.java.util.*;
 
 /**
  * The actual implementation of {@link AWSIotDevice}.
  */
-@Getter
-@Setter
 public abstract class AbstractAwsIotDevice {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractAwsIotDevice.class.getName());
 
     protected final String thingName;
 
-    protected long reportInterval = AWSIotConfig.DEVICE_REPORT_INTERVAL;
-    protected boolean enableVersioning = AWSIotConfig.DEVICE_ENABLE_VERSIONING;
-    protected AWSIotQos deviceReportQos = AWSIotQos.valueOf(AWSIotConfig.DEVICE_REPORT_QOS);
-    protected AWSIotQos shadowUpdateQos = AWSIotQos.valueOf(AWSIotConfig.DEVICE_SHADOW_UPDATE_QOS);
+    public String getThingName() {
+		return thingName;
+	}
+
+	protected long reportInterval = AWSIotConfig.DEVICE_REPORT_INTERVAL;
+    
+    public long getReportInterval() {
+		return reportInterval;
+	}
+    
+    public void setReportInterval(long reportInterval) {
+		this.reportInterval = reportInterval;
+	}
+
+	protected boolean enableVersioning = AWSIotConfig.DEVICE_ENABLE_VERSIONING;
+    
+	public void setEnableVersioning(boolean enableVersioning) {
+		this.enableVersioning = enableVersioning;
+	}
+
+	public boolean isEnableVersioning() {
+		return enableVersioning;
+	}
+
+	protected AWSIotQos deviceReportQos = AWSIotQos.valueOf(AWSIotConfig.DEVICE_REPORT_QOS);
+	protected AWSIotQos shadowUpdateQos = AWSIotQos.valueOf(AWSIotConfig.DEVICE_SHADOW_UPDATE_QOS);
     protected AWSIotQos methodQos = AWSIotQos.valueOf(AWSIotConfig.DEVICE_METHOD_QOS);
     protected AWSIotQos methodAckQos = AWSIotQos.valueOf(AWSIotConfig.DEVICE_METHOD_ACK_QOS);
 
-    private final Map<String, Field> reportedProperties;
-    private final Map<String, Field> updatableProperties;
+    public AWSIotQos getDeviceReportQos() {
+		return deviceReportQos;
+	}
+
+	public void setDeviceReportQos(AWSIotQos deviceReportQos) {
+		this.deviceReportQos = deviceReportQos;
+	}
+
+	public AWSIotQos getShadowUpdateQos() {
+		return shadowUpdateQos;
+	}
+
+	public void setShadowUpdateQos(AWSIotQos shadowUpdateQos) {
+		this.shadowUpdateQos = shadowUpdateQos;
+	}
+
+	public AWSIotQos getMethodQos() {
+		return methodQos;
+	}
+
+	public void setMethodQos(AWSIotQos methodQos) {
+		this.methodQos = methodQos;
+	}
+
+	public AWSIotQos getMethodAckQos() {
+		return methodAckQos;
+	}
+
+	public void setMethodAckQos(AWSIotQos methodAckQos) {
+		this.methodAckQos = methodAckQos;
+	}
+
+    private final Map reportedProperties;
+    private final Map updatableProperties;
     private final AwsIotDeviceCommandManager commandManager;
-    private final ConcurrentMap<String, Boolean> deviceSubscriptions;
+    private final ConcurrentMap deviceSubscriptions;
     private final ObjectMapper jsonObjectMapper;
 
     private AbstractAwsIotClient client;
-    private Future<?> syncTask;
+    public void setClient(AbstractAwsIotClient client) {
+		this.client = client;
+	}
+
+	public AbstractAwsIotClient getClient() {
+		return client;
+	}
+
+	private Timer syncTask;
     private AtomicLong localVersion;
 
-    protected AbstractAwsIotDevice(String thingName) {
+    public AtomicLong getLocalVersion() {
+		return localVersion;
+	}
+
+	protected AbstractAwsIotDevice(String thingName) {
         this.thingName = thingName;
 
         reportedProperties = getDeviceProperties(true, false);
         updatableProperties = getDeviceProperties(false, true);
         commandManager = new AwsIotDeviceCommandManager(this);
 
-        deviceSubscriptions = new ConcurrentHashMap<>();
-        for (String topic : getDeviceTopics()) {
-            deviceSubscriptions.put(topic, false);
+        deviceSubscriptions = new ConcurrentHashMap();
+        Iterator it;
+        for (it = ((List)getDeviceTopics()).iterator(); it.hasNext(); ) {
+        	String topic = (String)it.next();
+            deviceSubscriptions.put(topic, Boolean.FALSE);
         }
 
         jsonObjectMapper = new ObjectMapper();
@@ -166,7 +220,8 @@ public abstract class AbstractAwsIotDevice {
     public void activate() throws AWSIotException {
         stopSync();
 
-        for (String topic : getDeviceTopics()) {
+        for (Iterator it = getDeviceTopics().iterator(); it.hasNext();) {
+        	String topic = (String)it.next();
             AWSIotTopic awsIotTopic;
 
             if (commandManager.isDeltaTopic(topic)) {
@@ -186,8 +241,9 @@ public abstract class AbstractAwsIotDevice {
 
         commandManager.onDeactivate();
 
-        for (String topic : getDeviceTopics()) {
-            deviceSubscriptions.put(topic, false);
+        for (Iterator it = getDeviceTopics().iterator(); it.hasNext();) {
+        	String topic = (String)it.next();
+            deviceSubscriptions.put(topic, Boolean.FALSE);
 
             AWSIotTopic awsIotTopic = new AWSIotTopic(topic);
             client.unsubscribe(awsIotTopic, client.getServerAckTimeout());
@@ -195,20 +251,20 @@ public abstract class AbstractAwsIotDevice {
     }
 
     public boolean isTopicReady(String topic) {
-        Boolean status = deviceSubscriptions.get(topic);
+        Boolean status = (Boolean)deviceSubscriptions.get(topic);
 
         return Boolean.TRUE.equals(status);
     }
 
     public boolean isCommandReady(Command command) {
-        Boolean accepted = deviceSubscriptions.get(commandManager.getTopic(command, CommandAck.ACCEPTED));
-        Boolean rejected = deviceSubscriptions.get(commandManager.getTopic(command, CommandAck.REJECTED));
+        Boolean accepted = (Boolean)deviceSubscriptions.get(commandManager.getTopic(command, CommandAck.ACCEPTED));
+        Boolean rejected = (Boolean)deviceSubscriptions.get(commandManager.getTopic(command, CommandAck.REJECTED));
 
         return (Boolean.TRUE.equals(accepted) && Boolean.TRUE.equals(rejected));
     }
 
     public void onSubscriptionAck(String topic, boolean success) {
-        deviceSubscriptions.put(topic, success);
+        deviceSubscriptions.put(topic, success?Boolean.TRUE:Boolean.FALSE);
         commandManager.onSubscriptionAck(topic, success);
     }
 
@@ -222,8 +278,7 @@ public abstract class AbstractAwsIotDevice {
             return;
         }
 
-        syncTask = client.scheduleRoutineTask(new Runnable() {
-            @Override
+        syncTask = client.scheduleRoutineTask(new TimerTask() {
             public void run() {
                 if (!isCommandReady(Command.UPDATE)) {
                     LOGGER.fine("Device not ready for reporting");
@@ -249,7 +304,7 @@ public abstract class AbstractAwsIotDevice {
 
     protected void stopSync() {
         if (syncTask != null) {
-            syncTask.cancel(false);
+            syncTask.cancel();
             syncTask = null;
         }
 
@@ -293,8 +348,8 @@ public abstract class AbstractAwsIotDevice {
         }
     }
 
-    private Map<String, Field> getDeviceProperties(boolean enableReport, boolean allowUpdate) {
-        Map<String, Field> properties = new HashMap<>();
+    private Map getDeviceProperties(boolean enableReport, boolean allowUpdate) {
+        Map properties = new HashMap();
 
         for (Field field : this.getClass().getDeclaredFields()) {
             AWSIotDeviceProperty annotation = field.getAnnotation(AWSIotDeviceProperty.class);
@@ -311,8 +366,8 @@ public abstract class AbstractAwsIotDevice {
         return properties;
     }
 
-    private List<String> getDeviceTopics() {
-        List<String> topics = new ArrayList<>();
+    private List getDeviceTopics() {
+        List topics = (List) new ArrayList();
 
         topics.add(commandManager.getTopic(Command.DELTA, null));
 
@@ -327,3 +382,4 @@ public abstract class AbstractAwsIotDevice {
     }
 
 }
+

@@ -15,16 +15,13 @@
 
 package com.amazonaws.services.iot.client.mqtt;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.net.SocketFactory;
-
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.joshvm.java.util.HashSet;
+import org.joshvm.java.util.Set;
 
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;
@@ -33,29 +30,21 @@ import com.amazonaws.services.iot.client.core.AwsIotConnection;
 import com.amazonaws.services.iot.client.core.AwsIotMessageCallback;
 import com.amazonaws.services.iot.client.core.AwsIotRetryableException;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * This class extends {@link AwsIotConnection} to provide the basic MQTT pub/sub
  * functionalities using the Paho MQTT library.
  */
-@Getter
-@Setter
 public class AwsIotMqttConnection extends AwsIotConnection {
 
     private static final String USERNAME_METRIC_STRING = "?SDK=Java&Version=1.3.7";
-    private final SocketFactory socketFactory;
 
     private MqttAsyncClient mqttClient;
     private AwsIotMqttMessageListener messageListener;
     private AwsIotMqttClientListener clientListener;
 
-    public AwsIotMqttConnection(AbstractAwsIotClient client, SocketFactory socketFactory, String serverUri)
+    public AwsIotMqttConnection(AbstractAwsIotClient client, String serverUri)
             throws AWSIotException {
         super(client);
-
-        this.socketFactory = socketFactory;
 
         messageListener = new AwsIotMqttMessageListener(client);
         clientListener = new AwsIotMqttClientListener(client);
@@ -71,13 +60,12 @@ public class AwsIotMqttConnection extends AwsIotConnection {
     AwsIotMqttConnection(AbstractAwsIotClient client, MqttAsyncClient mqttClient) throws AWSIotException {
         super(client);
         this.mqttClient = mqttClient;
-        this.socketFactory = null;
     }
 
     public void openConnection(AwsIotMessageCallback callback) throws AWSIotException {
         try {
             AwsIotMqttConnectionListener connectionListener = new AwsIotMqttConnectionListener(client, true, callback);
-            MqttConnectOptions options = buildMqttConnectOptions(client, socketFactory);
+            MqttConnectOptions options = buildMqttConnectOptions(client);
             mqttClient.connect(options, null, connectionListener);
         } catch (MqttException e) {
             throw new AWSIotException(e);
@@ -93,7 +81,7 @@ public class AwsIotMqttConnection extends AwsIotConnection {
         }
     }
 
-    @Override
+    
     public void publishMessage(AWSIotMessage message) throws AWSIotException, AwsIotRetryableException {
         String topic = message.getTopic();
         MqttMessage mqttMessage = new MqttMessage(message.getPayload());
@@ -110,7 +98,7 @@ public class AwsIotMqttConnection extends AwsIotConnection {
         }
     }
 
-    @Override
+    
     public void subscribeTopic(AWSIotMessage message) throws AWSIotException, AwsIotRetryableException {
         try {
             mqttClient.subscribe(message.getTopic(), message.getQos().getValue(), message, messageListener);
@@ -123,7 +111,7 @@ public class AwsIotMqttConnection extends AwsIotConnection {
         }
     }
 
-    @Override
+    
     public void unsubscribeTopic(AWSIotMessage message) throws AWSIotException, AwsIotRetryableException {
         try {
             mqttClient.unsubscribe(message.getTopic(), message, messageListener);
@@ -136,14 +124,14 @@ public class AwsIotMqttConnection extends AwsIotConnection {
         }
     }
 
-    public Set<String> getServerUris() {
-        return new HashSet<>();
+    public Set getServerUris() {
+        return new HashSet();
     }
 
-    private MqttConnectOptions buildMqttConnectOptions(AbstractAwsIotClient client, SocketFactory socketFactory) {
+    private MqttConnectOptions buildMqttConnectOptions(AbstractAwsIotClient client) {
         MqttConnectOptions options = new MqttConnectOptions();
 
-        options.setSocketFactory(socketFactory);
+        //options.setSocketFactory(socketFactory);
         options.setCleanSession(client.isCleanSession());
         options.setConnectionTimeout(client.getConnectionTimeout() / 1000);
         options.setKeepAliveInterval(client.getKeepAliveInterval() / 1000);
@@ -151,7 +139,7 @@ public class AwsIotMqttConnection extends AwsIotConnection {
             options.setUserName(USERNAME_METRIC_STRING);
         }
 
-        Set<String> serverUris = getServerUris();
+        Set serverUris = getServerUris();
         if (serverUris != null && !serverUris.isEmpty()) {
             String[] uriArray = new String[serverUris.size()];
             serverUris.toArray(uriArray);

@@ -15,14 +15,15 @@
 
 package com.amazonaws.services.iot.client.mqtt;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.TimerTask;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 
 import com.amazonaws.services.iot.client.core.AbstractAwsIotClient;
 import com.amazonaws.services.iot.client.core.AwsIotMessageCallback;
+import com.amazonaws.services.iot.client.logging.Level;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 /**
  * This class implements listener functions for the connection events from the
@@ -43,10 +44,10 @@ public class AwsIotMqttConnectionListener implements IMqttActionListener {
         this.userCallback = userCallback;
     }
 
-    @Override
+    
     public void onSuccess(IMqttToken arg0) {
-        client.scheduleTask(new Runnable() {
-            @Override
+        client.scheduleTask(new TimerTask() {
+            
             public void run() {
                 if (isConnect) {
                     client.getConnection().onConnectionSuccess();
@@ -60,12 +61,11 @@ public class AwsIotMqttConnectionListener implements IMqttActionListener {
         });
     }
 
-    @Override
+    
     public void onFailure(IMqttToken arg0, Throwable arg1) {
         LOGGER.log(Level.WARNING, (isConnect ? "Connect" : "Disconnect") + " request failure", arg1);
 
-        client.scheduleTask(new Runnable() {
-            @Override
+        client.scheduleTask(new TimerTask() {
             public void run() {
                 if (isConnect) {
                     client.getConnection().onConnectionFailure();

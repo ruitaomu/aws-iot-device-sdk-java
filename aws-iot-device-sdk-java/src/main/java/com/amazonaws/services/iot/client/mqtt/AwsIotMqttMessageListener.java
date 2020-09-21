@@ -15,7 +15,7 @@
 
 package com.amazonaws.services.iot.client.mqtt;
 
-import java.util.logging.Logger;
+import java.util.TimerTask;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -23,6 +23,7 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
 
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.core.AbstractAwsIotClient;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 /**
  * This class implements listener functions for the message events from the Paho
@@ -40,7 +41,7 @@ public class AwsIotMqttMessageListener implements IMqttActionListener {
         this.client = client;
     }
 
-    @Override
+    
     public void onSuccess(IMqttToken token) {
         final AWSIotMessage message = (AWSIotMessage) token.getUserContext();
         if (message == null) {
@@ -61,8 +62,8 @@ public class AwsIotMqttMessageListener implements IMqttActionListener {
         }
 
         final boolean isSuccess = !forceFailure;
-        client.scheduleTask(new Runnable() {
-            @Override
+        client.scheduleTask(new TimerTask() {
+            
             public void run() {
                 if (isSuccess) {
                     message.onSuccess();
@@ -73,7 +74,7 @@ public class AwsIotMqttMessageListener implements IMqttActionListener {
         });
     }
 
-    @Override
+    
     public void onFailure(IMqttToken token, Throwable cause) {
         final AWSIotMessage message = (AWSIotMessage) token.getUserContext();
         if (message == null) {
@@ -82,8 +83,8 @@ public class AwsIotMqttMessageListener implements IMqttActionListener {
         }
 
         LOGGER.warning("Request failed for topic " + message.getTopic() + ": " + token.getException());
-        client.scheduleTask(new Runnable() {
-            @Override
+        client.scheduleTask(new TimerTask() {
+            
             public void run() {
                 message.onFailure();
             }

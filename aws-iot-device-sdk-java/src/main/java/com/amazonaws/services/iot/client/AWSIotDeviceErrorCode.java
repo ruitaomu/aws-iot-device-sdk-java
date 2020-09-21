@@ -19,26 +19,26 @@ package com.amazonaws.services.iot.client;
  * These error codes are used by the server in acknowledgement message for the
  * shadow methods, namely Get, Update, and Delete.
  */
-public enum AWSIotDeviceErrorCode {
+public class AWSIotDeviceErrorCode {
 
     /** The bad request. */
-    BAD_REQUEST(400),
+	public final static AWSIotDeviceErrorCode BAD_REQUEST = new AWSIotDeviceErrorCode(400);
     /** The Unauthorized. */
-    UNAUTHORIZED(401),
+	public final static AWSIotDeviceErrorCode UNAUTHORIZED = new AWSIotDeviceErrorCode(401);
     /** The Forbidden. */
-    FORBIDDEN(403),
+	public final static AWSIotDeviceErrorCode FORBIDDEN = new AWSIotDeviceErrorCode(403);
     /** The Not found. */
-    NOT_FOUND(404),
+	public final static AWSIotDeviceErrorCode NOT_FOUND = new AWSIotDeviceErrorCode(404);
     /** The Conflict. */
-    CONFLICT(409),
+	public final static AWSIotDeviceErrorCode CONFLICT = new AWSIotDeviceErrorCode(409);
     /** The Payload too large. */
-    PAYLOAD_TOO_LARGE(413),
+	public final static AWSIotDeviceErrorCode PAYLOAD_TOO_LARGE = new AWSIotDeviceErrorCode(413);
     /** The Unsupported media type. */
-    UNSUPPORTED_MEDIA_TYPE(415),
+	public final static AWSIotDeviceErrorCode UNSUPPORTED_MEDIA_TYPE = new AWSIotDeviceErrorCode(415);
     /** The Too many requests. */
-    TOO_MANY_REQUESTS(429),
+	public final static AWSIotDeviceErrorCode TOO_MANY_REQUESTS = new AWSIotDeviceErrorCode(429);
     /** The Internal service failure. */
-    INTERNAL_SERVICE_FAILURE(429);
+	public final static AWSIotDeviceErrorCode INTERNAL_SERVICE_FAILURE = new AWSIotDeviceErrorCode(429);
 
     /** The error code. */
     private final long errorCode;
@@ -71,11 +71,25 @@ public enum AWSIotDeviceErrorCode {
      *         code is unknown
      */
     public static AWSIotDeviceErrorCode valueOf(long code) {
-        for (AWSIotDeviceErrorCode errorCode : AWSIotDeviceErrorCode.values()) {
-            if (errorCode.errorCode == code) {
-                return errorCode;
-            }
-        }
+    	switch ((int)code) {
+		 /** The bad request. */
+		case 400: return BAD_REQUEST;
+	    /** The Unauthorized. */
+		case 401: return UNAUTHORIZED;
+	    /** The Forbidden. */
+		case 403: return FORBIDDEN;
+	    /** The Not found. */
+		case 404: return NOT_FOUND;
+	    /** The Conflict. */
+		case 409: return CONFLICT;
+	    /** The Payload too large. */
+		case 413: return PAYLOAD_TOO_LARGE;
+	    /** The Unsupported media type. */
+		case 415: return UNSUPPORTED_MEDIA_TYPE;
+	    /** The Too many requests. */
+		/** The Internal service failure. */
+		case 429: return INTERNAL_SERVICE_FAILURE;
+		}
 
         return null;
     }

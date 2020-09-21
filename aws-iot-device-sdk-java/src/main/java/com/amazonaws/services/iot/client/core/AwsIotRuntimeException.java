@@ -23,7 +23,7 @@ public class AwsIotRuntimeException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public AwsIotRuntimeException(Throwable e) {
-        super(e);
+        super(e.toString());
     }
 
     public AwsIotRuntimeException(String message) {

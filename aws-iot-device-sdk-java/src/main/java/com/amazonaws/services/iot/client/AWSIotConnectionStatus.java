@@ -19,15 +19,15 @@ package com.amazonaws.services.iot.client;
  * Connection status that can be retrieved through
  * {@link AWSIotMqttClient#getConnectionStatus()}.
  */
-public enum AWSIotConnectionStatus {
+public class AWSIotConnectionStatus {
 
     /** Client successfully connected. */
-    CONNECTED,
+	public final static AWSIotConnectionStatus CONNECTED = new AWSIotConnectionStatus();
 
     /** Not connected. */
-    DISCONNECTED,
+	public final static AWSIotConnectionStatus DISCONNECTED = new AWSIotConnectionStatus();
 
     /** Automatically reconnecting after connection loss. */
-    RECONNECTING
-
+	public final static AWSIotConnectionStatus RECONNECTING = new AWSIotConnectionStatus();
+	
 }

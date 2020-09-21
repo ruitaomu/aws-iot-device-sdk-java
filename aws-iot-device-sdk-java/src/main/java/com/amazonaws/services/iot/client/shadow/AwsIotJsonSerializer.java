@@ -31,7 +31,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  */
 public class AwsIotJsonSerializer extends JsonSerializer<AbstractAwsIotDevice> {
 
-    @Override
     public void serialize(AbstractAwsIotDevice device, JsonGenerator generator, SerializerProvider provider)
             throws IOException, JsonProcessingException {
         generator.writeStartObject();

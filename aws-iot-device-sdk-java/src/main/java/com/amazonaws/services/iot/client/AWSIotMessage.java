@@ -20,9 +20,6 @@ import java.io.UnsupportedEncodingException;
 import com.amazonaws.services.iot.client.core.AwsIotMessageCallback;
 import com.amazonaws.services.iot.client.core.AwsIotRuntimeException;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * A common data structure that is used in a lot of non-blocking APIs in this
  * library.
@@ -45,21 +42,29 @@ public class AWSIotMessage implements AwsIotMessageCallback {
      * @param topic the new topic of the message
      * @return the current topic of the message
      */
-    @Getter
-    @Setter
     protected String topic;
 
-    /**
+    public void setTopic(String topic) {
+		this.topic = topic;
+	}
+
+	public String getTopic() {
+		return topic;
+	}
+
+	/**
      * The MQTT QoS level for the message.
      *
      * @param qos the new QoS level
      * @return the current QoS level
      */
-    @Getter
-    @Setter
     protected AWSIotQos qos;
 
-    /**
+    public AWSIotQos getQos() {
+		return qos;
+	}
+
+	/**
      * The payload of the message.
      */
     protected byte[] payload;
@@ -71,22 +76,30 @@ public class AWSIotMessage implements AwsIotMessageCallback {
      * @param errorCode the new error code for the shadow method
      * @return the current error code of the shadow method
      */
-    @Getter
-    @Setter
     protected AWSIotDeviceErrorCode errorCode;
 
-    /**
+    public void setErrorCode(AWSIotDeviceErrorCode errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	public AWSIotDeviceErrorCode getErrorCode() {
+		return errorCode;
+	}
+
+	/**
      * Error message for shadow methods. It's only applicable to messages
      * returned by those shadow method APIs.
      *
      * @param errorMessage the new error message for the shadow method
      * @return the current error message of the shadow method
      */
-    @Getter
-    @Setter
     protected String errorMessage;
 
-    /**
+    public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	/**
      * Instantiates a new message object.
      *
      * @param topic
@@ -140,8 +153,11 @@ public class AWSIotMessage implements AwsIotMessageCallback {
         if (payload == null) {
             return null;
         }
+        
+        byte[] tmp = new byte[payload.length];
+        System.arraycopy(payload, 0, tmp, 0, tmp.length);
 
-        return payload.clone();
+        return tmp;
     }
 
     /**
@@ -156,7 +172,10 @@ public class AWSIotMessage implements AwsIotMessageCallback {
             return;
         }
 
-        this.payload = payload.clone();
+        byte[] tmp = new byte[payload.length];
+        System.arraycopy(payload, 0, tmp, 0, tmp.length);
+
+        this.payload = tmp;
     }
 
     /**
@@ -201,7 +220,6 @@ public class AWSIotMessage implements AwsIotMessageCallback {
      * Callback function to be invoked a non-block API has completed
      * successfully.
      */
-    @Override
     public void onSuccess() {
         // Default callback implementation is no-op
     }
@@ -210,7 +228,6 @@ public class AWSIotMessage implements AwsIotMessageCallback {
      * Callback function to be invoked a non-block API has completed
      * unsuccessfully.
      */
-    @Override
     public void onFailure() {
         // Default callback implementation is no-op
     }
@@ -218,7 +235,6 @@ public class AWSIotMessage implements AwsIotMessageCallback {
     /**
      * Callback function to be invoked a non-block API has timed out.
      */
-    @Override
     public void onTimeout() {
         // Default callback implementation is no-op
     }

@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
+import com.joshvm.java.util.Iterator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,8 +38,8 @@ public class AwsIotJsonDeserializer {
             throw new IOException("Invalid delta update received for " + device.getThingName());
         }
 
-        for (Iterator<String> it = node.fieldNames(); it.hasNext();) {
-            String property = it.next();
+        for (Iterator it = node.fieldNames(); it.hasNext();) {
+            String property = (String)it.next();
             Field field = device.getUpdatableProperties().get(property);
             JsonNode fieldNode = node.get(property);
             if (field == null || fieldNode == null) {

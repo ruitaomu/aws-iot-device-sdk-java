@@ -15,11 +15,10 @@
 
 package com.amazonaws.services.iot.client.shadow;
 
-import java.util.logging.Logger;
-
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotQos;
 import com.amazonaws.services.iot.client.AWSIotTopic;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 /**
  * This class extends {@link AWSIotTopic} to provide customized callback
@@ -36,23 +35,23 @@ public class AwsIotDeviceCommandAckListener extends AWSIotTopic {
         this.device = device;
     }
 
-    @Override
+    
     public void onMessage(AWSIotMessage message) {
         device.onCommandAck(message);
     }
 
-    @Override
+    
     public void onSuccess() {
         device.onSubscriptionAck(topic, true);
     }
 
-    @Override
+    
     public void onFailure() {
         LOGGER.warning("Failed to subscribe to device topic " + topic);
         device.onSubscriptionAck(topic, false);
     }
 
-    @Override
+    
     public void onTimeout() {
         LOGGER.warning("Timeout when subscribing to device topic " + topic);
         device.onSubscriptionAck(topic, false);

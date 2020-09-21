@@ -18,12 +18,12 @@ package com.amazonaws.services.iot.client.core;
 /**
  * Connection types supported by this library.
  */
-public enum AwsIotConnectionType {
+public class AwsIotConnectionType {
 
     /** The mqtt over tls. */
-    MQTT_OVER_TLS,
+    public final static AwsIotConnectionType MQTT_OVER_TLS = new AwsIotConnectionType();
     
     /** The mqtt over websocket. */
-    MQTT_OVER_WEBSOCKET
-
+    public final static AwsIotConnectionType MQTT_OVER_WEBSOCKET = new AwsIotConnectionType();
+    
 }

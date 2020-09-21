@@ -15,7 +15,7 @@
 
 package com.amazonaws.services.iot.client;
 
-import com.amazonaws.services.iot.client.shadow.AbstractAwsIotDevice;
+import com.amazonaws.services.iot.client.shadowme.AbstractAwsIotDevice;
 
 /**
  * This class encapsulates all the functionalities that one can use to interact
@@ -121,7 +121,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *
      * @return the report interval in milliseconds.
      */
-    @Override
+    
     public long getReportInterval() {
         return super.getReportInterval();
     }
@@ -135,7 +135,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @param reportInterval
      *            the new report interval
      */
-    @Override
+    
     public void setReportInterval(long reportInterval) {
         super.setReportInterval(reportInterval);
     }
@@ -145,7 +145,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *
      * @return true, if versioning is enabled for device updates.
      */
-    @Override
+    
     public boolean isEnableVersioning() {
         return super.isEnableVersioning();
     }
@@ -158,7 +158,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @param enableVersioning
      *            true to enable device update versioning; false to disable.
      */
-    @Override
+    
     public void setEnableVersioning(boolean enableVersioning) {
         super.setEnableVersioning(enableVersioning);
     }
@@ -169,7 +169,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *
      * @return the device report QoS
      */
-    @Override
+    
     public AWSIotQos getDeviceReportQos() {
         return super.getDeviceReportQos();
     }
@@ -182,7 +182,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @param deviceReportQos
      *            the new device report QoS
      */
-    @Override
+    
     public void setDeviceReportQos(AWSIotQos deviceReportQos) {
         super.setDeviceReportQos(deviceReportQos);
     }
@@ -193,7 +193,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *
      * @return the shadow update QoS
      */
-    @Override
+    
     public AWSIotQos getShadowUpdateQos() {
         return super.getShadowUpdateQos();
     }
@@ -206,7 +206,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @param shadowUpdateQos
      *            the new shadow update QoS
      */
-    @Override
+    
     public void setShadowUpdateQos(AWSIotQos shadowUpdateQos) {
         super.setShadowUpdateQos(shadowUpdateQos);
     }
@@ -217,7 +217,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *
      * @return the QoS level for sending shadow methods.
      */
-    @Override
+    
     public AWSIotQos getMethodQos() {
         return super.getMethodQos();
     }
@@ -230,7 +230,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @param methodQos
      *            the new QoS level for sending shadow methods.
      */
-    @Override
+    
     public void setMethodQos(AWSIotQos methodQos) {
         super.setMethodQos(methodQos);
     }
@@ -241,7 +241,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *
      * @return the QoS level for subscribing to acknowledgement messages.
      */
-    @Override
+    
     public AWSIotQos getMethodAckQos() {
         return super.getMethodAckQos();
     }
@@ -254,7 +254,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @param methodAckQos
      *            the new QoS level for subscribing to acknowledgement messages.
      */
-    @Override
+    
     public void setMethodAckQos(AWSIotQos methodAckQos) {
         super.setMethodAckQos(methodAckQos);
     }
@@ -275,7 +275,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotException
      *             exception thrown if the operation fails
      */
-    @Override
+    
     public String get() throws AWSIotException {
         return super.get();
     }
@@ -294,7 +294,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotTimeoutException
      *             exception thrown if the operation times out
      */
-    @Override
+    
     public String get(long timeout) throws AWSIotException, AWSIotTimeoutException {
         return super.get(timeout);
     }
@@ -319,7 +319,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotException
      *             exception thrown if the operation fails
      */
-    @Override
+    
     public void get(AWSIotMessage message, long timeout) throws AWSIotException {
         super.get(message, timeout);
     }
@@ -340,7 +340,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotException
      *             exception thrown if the operation fails
      */
-    @Override
+    
     public void update(String jsonState) throws AWSIotException {
         super.update(jsonState);
     }
@@ -359,7 +359,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotTimeoutException
      *             exception thrown if the operation times out
      */
-    @Override
+    
     public void update(String jsonState, long timeout) throws AWSIotException, AWSIotTimeoutException {
         super.update(jsonState, timeout);
     }
@@ -381,7 +381,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotException
      *             exception thrown if the operation fails
      */
-    @Override
+    
     public void update(AWSIotMessage message, long timeout) throws AWSIotException {
         super.update(message, timeout);
     }
@@ -399,7 +399,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotException
      *             exception thrown if the operation fails
      */
-    @Override
+    
     public void delete() throws AWSIotException {
         super.delete();
     }
@@ -416,7 +416,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotTimeoutException
      *             exception thrown if the operation times out
      */
-    @Override
+    
     public void delete(long timeout) throws AWSIotException, AWSIotTimeoutException {
         super.delete(timeout);
     }
@@ -438,7 +438,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      * @throws AWSIotException
      *             exception thrown if the operation fails
      */
-    @Override
+    
     public void delete(AWSIotMessage message, long timeout) throws AWSIotException {
         super.delete(message, timeout);
     }
@@ -457,7 +457,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *            the JSON document containing the delta between 'desired' and
      *            'reported' states
      */
-    @Override
+    
     public void onShadowUpdate(String jsonState) {
         super.onShadowUpdate(jsonState);
     }
@@ -471,7 +471,7 @@ public class AWSIotDevice extends AbstractAwsIotDevice {
      *
      * @return the JSON document containing 'reported' state
      */
-    @Override
+    
     public String onDeviceReport() {
         return super.onDeviceReport();
     }

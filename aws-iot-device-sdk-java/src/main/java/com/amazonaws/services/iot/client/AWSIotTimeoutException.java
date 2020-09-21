@@ -42,7 +42,7 @@ public class AWSIotTimeoutException extends Exception {
      *            cause is nonexistent or unknown.
      */
     public AWSIotTimeoutException(Throwable cause) {
-        super(cause);
+        super(cause.toString());
     }
 
 }

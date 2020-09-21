@@ -15,15 +15,13 @@
 
 package com.amazonaws.services.iot.client.core;
 
-import java.security.KeyStore;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-import javax.net.ssl.SSLSocketFactory;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.joshvm.java.util.*;
+import org.joshvm.java.util.concurrent.ConcurrentHashMap;
+import org.joshvm.java.util.concurrent.ConcurrentMap;
 
 import com.amazonaws.services.iot.client.AWSIotConfig;
 import com.amazonaws.services.iot.client.AWSIotConnectionStatus;
@@ -33,16 +31,13 @@ import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotQos;
 import com.amazonaws.services.iot.client.AWSIotTimeoutException;
 import com.amazonaws.services.iot.client.AWSIotTopic;
-import com.amazonaws.services.iot.client.shadow.AbstractAwsIotDevice;
+import com.amazonaws.services.iot.client.logging.Logger;
+import com.amazonaws.services.iot.client.shadowme.AbstractAwsIotDevice;
 
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * The actual implementation of {@code AWSIotMqttClient}.
  */
-@Getter
-@Setter
 public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
 
     private static final int DEFAULT_MQTT_PORT = 8883;
@@ -50,79 +45,127 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
     private static final Logger LOGGER = Logger.getLogger(AbstractAwsIotClient.class.getName());
 
     protected final String clientId;
-    protected final String clientEndpoint;
+    public String getClientId() {
+		return clientId;
+	}
+
+	protected final String clientEndpoint;
     protected final boolean clientEnableMetrics;
-    protected final AwsIotConnectionType connectionType;
+    public boolean isClientEnableMetrics() {
+		return clientEnableMetrics;
+	}
+
+	protected final AwsIotConnectionType connectionType;
 
     protected int port = DEFAULT_MQTT_PORT;
-    protected int numOfClientThreads = AWSIotConfig.NUM_OF_CLIENT_THREADS;
-    protected int connectionTimeout = AWSIotConfig.CONNECTION_TIMEOUT;
-    protected int serverAckTimeout = AWSIotConfig.SERVER_ACK_TIMEOUT;
-    protected int keepAliveInterval = AWSIotConfig.KEEP_ALIVE_INTERVAL;
-    protected int maxConnectionRetries = AWSIotConfig.MAX_CONNECTION_RETRIES;
-    protected int baseRetryDelay = AWSIotConfig.CONNECTION_BASE_RETRY_DELAY;
-    protected int maxRetryDelay = AWSIotConfig.CONNECTION_MAX_RETRY_DELAY;
-    protected int maxOfflineQueueSize = AWSIotConfig.MAX_OFFLINE_QUEUE_SIZE;
-    protected boolean cleanSession = AWSIotConfig.CLEAN_SESSION;
-    protected AWSIotMessage willMessage;
+    public String getClientEndpoint() {
+		return clientEndpoint;
+	}
 
-    private final ConcurrentMap<String, AWSIotTopic> subscriptions = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, AbstractAwsIotDevice> devices = new ConcurrentHashMap<>();
+	public int getPort() {
+		return port;
+	}
+
+	protected int numOfClientThreads = AWSIotConfig.NUM_OF_CLIENT_THREADS;
+    public int getNumOfClientThreads() {
+		return numOfClientThreads;
+	}
+
+	public void setNumOfClientThreads(int numOfClientThreads) {
+		this.numOfClientThreads = numOfClientThreads;
+	}
+
+	protected int connectionTimeout = AWSIotConfig.CONNECTION_TIMEOUT;
+    public void setConnectionTimeout(int connectionTimeout) {
+		this.connectionTimeout = connectionTimeout;
+	}
+
+	protected int serverAckTimeout = AWSIotConfig.SERVER_ACK_TIMEOUT;
+    public int getServerAckTimeout() {
+		return serverAckTimeout;
+	}
+
+	public void setServerAckTimeout(int serverAckTimeout) {
+		this.serverAckTimeout = serverAckTimeout;
+	}
+
+	protected int keepAliveInterval = AWSIotConfig.KEEP_ALIVE_INTERVAL;
+    public void setKeepAliveInterval(int keepAliveInterval) {
+		this.keepAliveInterval = keepAliveInterval;
+	}
+
+	public int getConnectionTimeout() {
+		return connectionTimeout;
+	}
+
+	public int getKeepAliveInterval() {
+		return keepAliveInterval;
+	}
+
+	protected int maxConnectionRetries = AWSIotConfig.MAX_CONNECTION_RETRIES;
+    public void setMaxConnectionRetries(int maxConnectionRetries) {
+		this.maxConnectionRetries = maxConnectionRetries;
+	}
+
+	public int getMaxConnectionRetries() {
+		return maxConnectionRetries;
+	}
+
+	protected int baseRetryDelay = AWSIotConfig.CONNECTION_BASE_RETRY_DELAY;
+    public void setBaseRetryDelay(int baseRetryDelay) {
+		this.baseRetryDelay = baseRetryDelay;
+	}
+
+	public int getBaseRetryDelay() {
+		return baseRetryDelay;
+	}
+
+	protected int maxRetryDelay = AWSIotConfig.CONNECTION_MAX_RETRY_DELAY;
+    public void setMaxRetryDelay(int maxRetryDelay) {
+		this.maxRetryDelay = maxRetryDelay;
+	}
+
+	public int getMaxRetryDelay() {
+		return maxRetryDelay;
+	}
+
+	protected int maxOfflineQueueSize = AWSIotConfig.MAX_OFFLINE_QUEUE_SIZE;
+    public void setMaxOfflineQueueSize(int maxOfflineQueueSize) {
+		this.maxOfflineQueueSize = maxOfflineQueueSize;
+	}
+
+	public int getMaxOfflineQueueSize() {
+		return maxOfflineQueueSize;
+	}
+
+	protected boolean cleanSession = AWSIotConfig.CLEAN_SESSION;
+    public void setCleanSession(boolean cleanSession) {
+		this.cleanSession = cleanSession;
+	}
+
+	public boolean isCleanSession() {
+		return cleanSession;
+	}
+
+	protected AWSIotMessage willMessage;
+
+    public void setWillMessage(AWSIotMessage willMessage) {
+		this.willMessage = willMessage;
+	}
+
+	public AWSIotMessage getWillMessage() {
+		return willMessage;
+	}
+
+	private final ConcurrentMap subscriptions = new ConcurrentHashMap();
+    private final ConcurrentMap devices = new ConcurrentHashMap();
     private final AwsIotConnection connection;
 
-    private ScheduledExecutorService executionService;
+    public AwsIotConnection getConnection() {
+		return connection;
+	}
 
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, KeyStore keyStore, String keyPassword,
-                                   boolean enableSdkMetrics) {
-        this.clientEndpoint = clientEndpoint;
-        this.clientId = clientId;
-        this.connectionType = AwsIotConnectionType.MQTT_OVER_TLS;
-        this.clientEnableMetrics = enableSdkMetrics;
-
-        try {
-            connection = new AwsIotTlsConnection(this, keyStore, keyPassword);
-        } catch (AWSIotException e) {
-            throw new AwsIotRuntimeException(e);
-        }
-    }
-    
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, KeyStore keyStore, String keyPassword) {
-        // Enable Metrics by default
-        this(clientEndpoint, clientId, keyStore, keyPassword, true);
-    }
-
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, String awsAccessKeyId,
-                                   String awsSecretAccessKey, String sessionToken, boolean enableSdkMetrics) {
-        //setting the region blank to ensure it's determined from the clientEndpoint
-        this(clientEndpoint, clientId, awsAccessKeyId, awsSecretAccessKey, sessionToken, "", enableSdkMetrics);
-    }
-
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, String awsAccessKeyId,
-                                   String awsSecretAccessKey, String sessionToken,
-                                   String region, boolean enableSdkMetrics) {
-        this.clientEndpoint = clientEndpoint;
-        this.clientId = clientId;
-        this.connectionType = AwsIotConnectionType.MQTT_OVER_WEBSOCKET;
-        this.clientEnableMetrics = enableSdkMetrics;
-
-        try {
-            connection = new AwsIotWebsocketConnection(this, awsAccessKeyId, awsSecretAccessKey, sessionToken, region);
-        } catch (AWSIotException e) {
-            throw new AwsIotRuntimeException(e);
-        }
-    }
-
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, String awsAccessKeyId,
-                                   String awsSecretAccessKey, String sessionToken) {
-        // Enable Metrics by default
-        this(clientEndpoint, clientId, awsAccessKeyId, awsSecretAccessKey, sessionToken, true);
-    }
-
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, String awsAccessKeyId,
-                                   String awsSecretAccessKey, String sessionToken, String region) {
-        // Enable Metrics by default
-        this(clientEndpoint, clientId, awsAccessKeyId, awsSecretAccessKey, sessionToken, region, true);
-    }
+	private ScheduledThreadPool executionService;
 
     AbstractAwsIotClient(String clientEndpoint, String clientId, AwsIotConnection connection,
                          boolean enableSdkMetrics) {
@@ -138,24 +181,7 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
         this(clientEndpoint, clientId, connection, true);
     }
 
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, SSLSocketFactory socketFactory, boolean enableSdkMetrics) {
-        this.clientEndpoint = clientEndpoint;
-        this.clientId = clientId;
-        this.connectionType = null;
-        this.clientEnableMetrics = enableSdkMetrics;
-
-        try {
-            this.connection = new AwsIotTlsConnection(this, socketFactory);
-        } catch (AWSIotException e) {
-            throw new AwsIotRuntimeException(e);
-        }
-    }
-
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, SSLSocketFactory socketFactory) {
-        this(clientEndpoint, clientId, socketFactory, true);
-    }
-
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, SSLSocketFactory socketFactory, int port, boolean enableSdkMetrics) {
+    protected AbstractAwsIotClient(String clientEndpoint, String clientId, int port, boolean enableSdkMetrics) {
         this.clientEndpoint = clientEndpoint;
         this.clientId = clientId;
         this.connectionType = AwsIotConnectionType.MQTT_OVER_TLS;
@@ -163,14 +189,14 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
         this.clientEnableMetrics = enableSdkMetrics;
 
         try {
-            this.connection = new AwsIotTlsConnection(this, socketFactory);
+            this.connection = new AwsIotTlsConnection(this);
         } catch (AWSIotException e) {
             throw new AwsIotRuntimeException(e);
         }
     }
 
-    protected AbstractAwsIotClient(String clientEndpoint, String clientId, SSLSocketFactory socketFactory, int port) {
-        this(clientEndpoint, clientId, socketFactory, port, true);
+    protected AbstractAwsIotClient(String clientEndpoint, String clientId, int port) {
+        this(clientEndpoint, clientId, port, true);
     }
 
     public void updateCredentials(String awsAccessKeyId, String awsSecretAccessKey, String sessionToken) {
@@ -193,7 +219,7 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
     public void connect(long timeout, boolean blocking) throws AWSIotException, AWSIotTimeoutException {
         synchronized (this) {
             if (executionService == null) {
-                executionService = Executors.newScheduledThreadPool(numOfClientThreads);
+                executionService = new ScheduledThreadPool(numOfClientThreads);
             }
         }
 
@@ -363,34 +389,54 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
             return false;
         }
 
-        String[] filterTokens = topicFilter.split("/");
-        String[] topicTokens = topic.split("/");
-        if (filterTokens.length > topicTokens.length) {
+        StringTokenizer filterTokens = new StringTokenizer(topicFilter, "/");
+        StringTokenizer topicTokens = new StringTokenizer(topic, "/");
+        int filterTokensLength = 0;
+        int topicTokensLength = 0;
+        while (filterTokens.hasMoreTokens()) {
+        	filterTokens.nextToken();
+        	filterTokensLength++;
+        }
+        
+        while (topicTokens.hasMoreTokens()) {
+        	topicTokens.nextToken();
+        	topicTokensLength++;
+        }
+        
+        if (filterTokensLength > topicTokensLength) {
             return false;
         }
-
-        for (int i = 0; i < filterTokens.length; i++) {
-            if (filterTokens[i].equals("#")) {
+        
+        filterTokens = new StringTokenizer(topicFilter, "/");
+        topicTokens = new StringTokenizer(topic, "/");
+                
+        int i = 0;
+        while (filterTokens.hasMoreTokens()) {
+        	String filterToken = filterTokens.nextToken();
+        	String topicToken = topicTokens.nextToken();
+            if (filterToken.equals("#")) {
                 // '#' must be the last character
-                return ((i + 1) == filterTokens.length);
+                return ((i + 1) == filterTokensLength);
             }
 
-            if (!(filterTokens[i].equals(topicTokens[i]) || filterTokens[i].equals("+"))) {
+            if (!(filterToken.equals(topicToken) || filterToken.equals("+"))) {
                 return false;
             }
+            i++;
         }
 
-        return (filterTokens.length == topicTokens.length);
+        return (filterTokensLength == topicTokensLength);
     }
 
     public void dispatch(final AWSIotMessage message) {
         boolean matches = false;
 
-        for (String topicFilter : subscriptions.keySet()) {
+        for (Iterator it = subscriptions.keySet().iterator(); it.hasNext();) {
+        	String topicFilter = (String)it.next();
             if (topicFilterMatch(topicFilter, message.getTopic())) {
-                final AWSIotTopic topic = subscriptions.get(topicFilter);
-                scheduleTask(new Runnable() {
-                    @Override
+                final AWSIotTopic topic = (AWSIotTopic)subscriptions.get(topicFilter);
+                scheduleTask(new TimerTask() {
+                    
                     public void run() {
                         topic.onMessage(message);
                     }
@@ -433,19 +479,19 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
         }
     }
 
-    @Override
+    
     public void onConnectionSuccess() {
         LOGGER.info("Client connection active: " + clientId);
 
         try {
             // resubscribe all the subscriptions
-            for (AWSIotTopic topic : subscriptions.values()) {
-                subscribe(topic, serverAckTimeout);
+            for (Iterator it = subscriptions.values().iterator(); it.hasNext();) {
+                subscribe((AWSIotTopic)it.next(), serverAckTimeout);
             }
 
             // start device sync
-            for (AbstractAwsIotDevice device : devices.values()) {
-                device.activate();
+            for (Iterator it = devices.values().iterator(); it.hasNext();) {
+                ((AbstractAwsIotDevice)it.next()).activate();
             }
         } catch (AWSIotException e) {
             // connection couldn't be fully recovered, disconnecting
@@ -458,12 +504,14 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
         }
     }
 
-    @Override
+    
     public void onConnectionFailure() {
         LOGGER.info("Client connection lost: " + clientId);
 
         // stop device sync
-        for (AbstractAwsIotDevice device : devices.values()) {
+        Iterator it = devices.values().iterator();
+        while (it.hasNext()) {
+        	AbstractAwsIotDevice device = (AbstractAwsIotDevice)it.next();
             try {
                 device.deactivate();
             } catch (AWSIotException e) {
@@ -473,12 +521,14 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
         }
     }
 
-    @Override
+    
     public void onConnectionClosed() {
         LOGGER.info("Client connection closed: " + clientId);
 
         // stop device sync
-        for (AbstractAwsIotDevice device : devices.values()) {
+        Iterator it = devices.values().iterator();
+        while (it.hasNext()) {
+        	AbstractAwsIotDevice device = (AbstractAwsIotDevice)it.next();
             try {
                 device.deactivate();
             } catch (AWSIotException e) {
@@ -493,22 +543,22 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
         executionService.shutdown();
     }
 
-    public Future<?> scheduleTask(Runnable runnable) {
+    public Timer scheduleTask(TimerTask runnable) {
         return scheduleTimeoutTask(runnable, 0);
     }
 
-    public Future<?> scheduleTimeoutTask(Runnable runnable, long timeout) {
+    public Timer scheduleTimeoutTask(TimerTask runnable, long timeout) {
         if (executionService == null) {
             throw new AwsIotRuntimeException("Client is not connected");
         }
-        return executionService.schedule(runnable, timeout, TimeUnit.MILLISECONDS);
+        return executionService.schedule(runnable, timeout);
     }
 
-    public Future<?> scheduleRoutineTask(Runnable runnable, long initialDelay, long period) {
+    public Timer scheduleRoutineTask(TimerTask runnable, long initialDelay, long period) {
         if (executionService == null) {
             throw new AwsIotRuntimeException("Client is not connected");
         }
-        return executionService.scheduleAtFixedRate(runnable, initialDelay, period, TimeUnit.MILLISECONDS);
+        return executionService.scheduleAtFixedRate(runnable, initialDelay, period);
     }
 
 }

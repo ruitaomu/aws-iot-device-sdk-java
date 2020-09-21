@@ -15,11 +15,10 @@
 
 package com.amazonaws.services.iot.client.shadow;
 
-import java.util.logging.Logger;
-
 import com.amazonaws.services.iot.client.AWSIotDeviceErrorCode;
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotQos;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 public class AwsIotDeviceReportMessage extends AWSIotMessage {
 
@@ -35,13 +34,13 @@ public class AwsIotDeviceReportMessage extends AWSIotMessage {
         this.reportVersion = reportVersion;
     }
 
-    @Override
+    
     public void onSuccess() {
         // increment local version only if it hasn't be updated
         device.getLocalVersion().compareAndSet(reportVersion, reportVersion + 1);
     }
 
-    @Override
+    
     public void onFailure() {
         if (AWSIotDeviceErrorCode.CONFLICT.equals(errorCode)) {
             LOGGER.warning("Device version conflict, restart version synchronization");

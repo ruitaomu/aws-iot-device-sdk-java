@@ -15,17 +15,13 @@
 
 package com.amazonaws.services.iot.client.shadow;
 
-import java.util.logging.Logger;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotTimeoutException;
 import com.amazonaws.services.iot.client.core.AwsIotCompletion;
 import com.amazonaws.services.iot.client.shadow.AwsIotDeviceCommandManager.Command;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * This is a helper class that can be used to manage the execution result of a
@@ -35,20 +31,33 @@ import lombok.Setter;
  * 
  * @see com.amazonaws.services.iot.client.core.AwsIotCompletion
  */
-@Getter
-@Setter
 public class AwsIotDeviceCommand extends AwsIotCompletion {
 
     private static final Logger LOGGER = Logger.getLogger(AwsIotDeviceCommand.class.getName());
 
     private final AwsIotDeviceCommandManager commandManager;
     private final Command command;
-    private final String commandId;
+    public Command getCommand() {
+		return command;
+	}
 
-    private AWSIotMessage response;
+	private final String commandId;
 
-    @Setter(AccessLevel.NONE)
-    private Boolean requestSent;
+    public String getCommandId() {
+		return commandId;
+	}
+
+	private AWSIotMessage response;
+
+    public AWSIotMessage getResponse() {
+		return response;
+	}
+
+	public void setResponse(AWSIotMessage response) {
+		this.response = response;
+	}
+
+	private boolean requestSent;
 
     public AwsIotDeviceCommand(AwsIotDeviceCommandManager commandManager, Command command, String commandId,
             AWSIotMessage request, long commandTimeout, boolean isAsync) {
@@ -82,7 +91,7 @@ public class AwsIotDeviceCommand extends AwsIotCompletion {
         }
     }
 
-    @Override
+    
     public void onSuccess() {
         // first callback is for the command ack, which we ignore
         if (response == null) {
@@ -94,12 +103,12 @@ public class AwsIotDeviceCommand extends AwsIotCompletion {
         super.onSuccess();
     }
 
-    @Override
+    
     public void onFailure() {
         super.onFailure();
     }
 
-    @Override
+    
     public void onTimeout() {
         commandManager.onCommandTimeout(this);
         super.onTimeout();

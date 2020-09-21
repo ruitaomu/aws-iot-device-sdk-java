@@ -15,17 +15,17 @@
 
 package com.amazonaws.services.iot.client.core;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.amazonaws.services.iot.client.logging.Level;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 import com.amazonaws.services.iot.client.AWSIotConnectionStatus;
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.joshvm.java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * This class provides an abstract layer for the library to communicate with the
@@ -42,34 +42,49 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      *
      * @return the current client
      */
-    @Getter
     protected AbstractAwsIotClient client;
 
-    /**
+    public AbstractAwsIotClient getClient() {
+		return client;
+	}
+
+	/**
      * The connection status.
      * 
      * @param connectionStatus
      *            the new connection status
      * @return the current connection status
      */
-    @Getter
-    @Setter
     protected AWSIotConnectionStatus connectionStatus = AWSIotConnectionStatus.DISCONNECTED;
 
-    /**
+    public AWSIotConnectionStatus getConnectionStatus() {
+		return connectionStatus;
+	}
+
+	public void setConnectionStatus(AWSIotConnectionStatus connectionStatus) {
+		this.connectionStatus = connectionStatus;
+	}
+
+	public int getRetryTimes() {
+		return retryTimes;
+	}
+
+	public AwsIotMessageCallback getConnectCallback() {
+		return connectCallback;
+	}
+
+	/**
      * The future object holding the retry task.
      * 
      * @return the current retry task
      */
-    @Getter
-    private Future<?> retryTask;
+    private Timer retryTask;
 
     /**
      * The retry times.
      * 
      * @return the current retry times
      */
-    @Getter
     private int retryTimes;
 
     /**
@@ -77,7 +92,6 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      *
      * @return the current connect callback
      */
-    @Getter
     private AwsIotMessageCallback connectCallback;
 
     /**
@@ -85,17 +99,19 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      *
      * @return the current user disconnect flag
      */
-    @Getter
     private boolean userDisconnect;
 
-    /**
+    public boolean isUserDisconnect() {
+		return userDisconnect;
+	}
+
+	/**
      * The offline publish queue holding messages while the connection is being
      * established.
      * 
      * @return the current offline publish queue
      */
-    @Getter
-    private ConcurrentLinkedQueue<AWSIotMessage> publishQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue publishQueue = new ConcurrentLinkedQueue();
 
     /**
      * The offline subscribe request queue holding messages while the connection
@@ -103,8 +119,7 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      * 
      * @return the current offline subscribe request queue
      */
-    @Getter
-    private ConcurrentLinkedQueue<AWSIotMessage> subscribeQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue subscribeQueue = new ConcurrentLinkedQueue();
 
     /**
      * The offline unsubscribe request queue holding messages while the
@@ -112,10 +127,21 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      * 
      * @return the current offline unsubscribe request queue
      */
-    @Getter
-    private ConcurrentLinkedQueue<AWSIotMessage> unsubscribeQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue unsubscribeQueue = new ConcurrentLinkedQueue();
 
-    /**
+    public ConcurrentLinkedQueue getPublishQueue() {
+		return publishQueue;
+	}
+
+	public ConcurrentLinkedQueue getSubscribeQueue() {
+		return subscribeQueue;
+	}
+
+	public ConcurrentLinkedQueue getUnsubscribeQueue() {
+		return unsubscribeQueue;
+	}
+
+	/**
      * Instantiates a new connection object.
      *
      * @param client
@@ -317,7 +343,7 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      * @see com.amazonaws.services.iot.client.core.AwsIotConnectionCallback#
      * onConnectionSuccess()
      */
-    @Override
+    
     public void onConnectionSuccess() {
         LOGGER.info("Connection successfully established");
 
@@ -329,19 +355,28 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
         // process offline messages
         try {
             while (subscribeQueue.size() > 0) {
-                AWSIotMessage message = subscribeQueue.poll();
+                AWSIotMessage message = (AWSIotMessage)subscribeQueue.poll();
                 subscribeTopic(message);
             }
             while (unsubscribeQueue.size() > 0) {
-                AWSIotMessage message = unsubscribeQueue.poll();
+                AWSIotMessage message = (AWSIotMessage)unsubscribeQueue.poll();
                 unsubscribeTopic(message);
             }
             while (publishQueue.size() > 0) {
-                AWSIotMessage message = publishQueue.poll();
+                AWSIotMessage message = (AWSIotMessage)publishQueue.poll();
                 publishMessage(message);
             }
-        } catch (AWSIotException | AwsIotRetryableException e) {
+        } catch (AWSIotException e) {
             // should close the connection if we can't send message when
+            // connection is good
+            LOGGER.log(Level.WARNING, "Failed to send queued messages, will disconnect", e);
+            try {
+                closeConnection(null);
+            } catch (AWSIotException ie) {
+                LOGGER.log(Level.WARNING, "Failed to disconnect", ie);
+            }
+        } catch (AwsIotRetryableException e) {
+        	// should close the connection if we can't send message when
             // connection is good
             LOGGER.log(Level.WARNING, "Failed to send queued messages, will disconnect", e);
             try {
@@ -365,7 +400,7 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      * @see com.amazonaws.services.iot.client.core.AwsIotConnectionCallback#
      * onConnectionFailure()
      */
-    @Override
+    
     public void onConnectionFailure() {
         LOGGER.info("Connection temporarily lost");
 
@@ -394,7 +429,7 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      * @see com.amazonaws.services.iot.client.core.AwsIotConnectionCallback#
      * onConnectionClosed()
      */
-    @Override
+    
     public void onConnectionClosed() {
         LOGGER.info("Connection permanently closed");
 
@@ -425,7 +460,7 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      */
     private void cancelRetry() {
         if (retryTask != null) {
-            retryTask.cancel(false);
+            retryTask.cancel();
             retryTask = null;
         }
     }
@@ -437,7 +472,7 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
      * @return the retry delay
      */
     long getRetryDelay() {
-        double delay = Math.pow(2.0, retryTimes) * client.getBaseRetryDelay();
+        double delay = retryTimes * retryTimes * client.getBaseRetryDelay();
         delay = Math.min(delay, (double)client.getMaxRetryDelay());
         delay = Math.max(delay, 0.0);
         return (long)delay;
@@ -453,8 +488,8 @@ public abstract class AwsIotConnection implements AwsIotConnectionCallback {
             return;
         }
 
-        retryTask = client.scheduleTimeoutTask(new Runnable() {
-            @Override
+        retryTask = client.scheduleTimeoutTask(new TimerTask() {
+            
             public void run() {
                 LOGGER.info("Connection is being retried");
 

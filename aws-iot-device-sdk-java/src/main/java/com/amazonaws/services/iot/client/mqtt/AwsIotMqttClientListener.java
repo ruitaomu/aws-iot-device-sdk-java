@@ -15,6 +15,8 @@
 
 package com.amazonaws.services.iot.client.mqtt;
 
+import java.util.TimerTask;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -35,22 +37,22 @@ public class AwsIotMqttClientListener implements MqttCallback {
         this.client = client;
     }
 
-    @Override
+    
     public void connectionLost(Throwable arg0) {
-        client.scheduleTask(new Runnable() {
-            @Override
+        client.scheduleTask(new TimerTask() {
+            
             public void run() {
                 client.getConnection().onConnectionFailure();
             }
         });
     }
 
-    @Override
+    
     public void deliveryComplete(IMqttDeliveryToken arg0) {
         // Callback is not used
     }
 
-    @Override
+    
     public void messageArrived(String topic, MqttMessage arg1) throws Exception {
         AWSIotMessage message = new AWSIotMessage(topic, AWSIotQos.valueOf(arg1.getQos()), arg1.getPayload());
         client.dispatch(message);

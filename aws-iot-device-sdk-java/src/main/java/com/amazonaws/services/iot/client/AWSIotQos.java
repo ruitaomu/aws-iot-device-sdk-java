@@ -19,13 +19,13 @@ package com.amazonaws.services.iot.client;
  * QoS definitions. The AWS IoT service supports QoS0 and QoS1 defined by the
  * MQTT protocol.
  */
-public enum AWSIotQos {
+public class AWSIotQos {
 
     /** The QoS0. */
-    QOS0(0),
+    final static public AWSIotQos QOS0 = new AWSIotQos(0);
 
     /** The QoS1. */
-    QOS1(1);
+    final static public AWSIotQos QOS1 = new AWSIotQos(1);
 
     /** The qos. */
     private final int qos;

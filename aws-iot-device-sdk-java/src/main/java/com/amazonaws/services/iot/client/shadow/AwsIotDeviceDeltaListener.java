@@ -16,12 +16,11 @@
 package com.amazonaws.services.iot.client.shadow;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotQos;
 import com.amazonaws.services.iot.client.AWSIotTopic;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 /**
  * This class extends {@link AWSIotTopic} to provide a callback function for
@@ -38,7 +37,7 @@ public class AwsIotDeviceDeltaListener extends AWSIotTopic {
         this.device = device;
     }
 
-    @Override
+    
     public void onMessage(AWSIotMessage message) {
         String payload = message.getStringPayload();
         if (payload == null) {
@@ -84,16 +83,16 @@ public class AwsIotDeviceDeltaListener extends AWSIotTopic {
         device.onShadowUpdate(node.toString());
     }
 
-    @Override
+    
     public void onSuccess() {
     }
 
-    @Override
+    
     public void onFailure() {
         LOGGER.warning("Failed to subscribe to device topic " + topic);
     }
 
-    @Override
+    
     public void onTimeout() {
         LOGGER.warning("Timeout when subscribing to device topic " + topic);
     }

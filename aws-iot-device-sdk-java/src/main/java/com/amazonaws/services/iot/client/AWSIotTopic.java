@@ -63,7 +63,6 @@ public class AWSIotTopic extends AWSIotMessage implements AwsIotTopicCallback {
      * @param message
      *            the message received
      */
-    @Override
     public void onMessage(AWSIotMessage message) {
         // Default callback implementation is no-op
     }

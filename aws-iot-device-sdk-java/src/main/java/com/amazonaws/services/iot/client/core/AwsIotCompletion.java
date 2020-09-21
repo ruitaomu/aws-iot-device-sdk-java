@@ -15,7 +15,8 @@
 
 package com.amazonaws.services.iot.client.core;
 
-import java.util.concurrent.Future;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;
@@ -40,7 +41,7 @@ public class AwsIotCompletion extends AWSIotMessage {
     protected final boolean isAsync;
 
     /** The future object of the timeout task. */
-    protected Future<?> timeoutTask;
+    protected Timer timeoutTask;
 
     /** Indicates whether the request has completed successfully. */
     protected boolean hasSuccess;
@@ -184,8 +185,8 @@ public class AwsIotCompletion extends AWSIotMessage {
             }
 
             if (timeout > 0) {
-                timeoutTask = client.scheduleTimeoutTask(new Runnable() {
-                    @Override
+                timeoutTask = client.scheduleTimeoutTask(new TimerTask() {
+                    
                     public void run() {
                         onTimeout();
                     }
@@ -223,7 +224,7 @@ public class AwsIotCompletion extends AWSIotMessage {
      * 
      * @see com.amazonaws.services.iot.client.AwsIotMessage#onSuccess()
      */
-    @Override
+    
     public void onSuccess() {
         synchronized (this) {
             if (hasSuccess || hasFailure || hasTimeout) {
@@ -249,7 +250,7 @@ public class AwsIotCompletion extends AWSIotMessage {
      * 
      * @see com.amazonaws.services.iot.client.AwsIotMessage#onFailure()
      */
-    @Override
+    
     public void onFailure() {
         synchronized (this) {
             if (hasSuccess || hasFailure || hasTimeout) {
@@ -277,7 +278,7 @@ public class AwsIotCompletion extends AWSIotMessage {
      * 
      * @see com.amazonaws.services.iot.client.AwsIotMessage#onTimeout()
      */
-    @Override
+    
     public void onTimeout() {
         synchronized (this) {
             if (hasSuccess || hasFailure || hasTimeout) {
@@ -302,8 +303,8 @@ public class AwsIotCompletion extends AWSIotMessage {
      * Cancel timeout task.
      */
     private void cancelTimeoutTask() {
-        if (timeoutTask != null && !timeoutTask.isCancelled()) {
-            timeoutTask.cancel(false);
+        if (timeoutTask != null) {
+            timeoutTask.cancel();
         }
     }
 

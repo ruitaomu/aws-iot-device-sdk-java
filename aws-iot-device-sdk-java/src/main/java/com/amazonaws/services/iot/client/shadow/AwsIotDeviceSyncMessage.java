@@ -16,11 +16,11 @@
 package com.amazonaws.services.iot.client.shadow;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import com.amazonaws.services.iot.client.AWSIotDeviceErrorCode;
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotQos;
+import com.amazonaws.services.iot.client.logging.Logger;
 
 public class AwsIotDeviceSyncMessage extends AWSIotMessage {
 
@@ -33,7 +33,7 @@ public class AwsIotDeviceSyncMessage extends AWSIotMessage {
         this.device = device;
     }
 
-    @Override
+    
     public void onSuccess() {
         if (payload != null) {
             try {
@@ -53,7 +53,7 @@ public class AwsIotDeviceSyncMessage extends AWSIotMessage {
         }
     }
 
-    @Override
+    
     public void onFailure() {
         if (AWSIotDeviceErrorCode.NOT_FOUND.equals(errorCode)) {
             LOGGER.info("No shadow document found, reset local version to 0");

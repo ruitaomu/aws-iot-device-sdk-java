@@ -13,22 +13,24 @@
  * permissions and limitations under the License.
  */
 
-package com.amazonaws.services.iot.client.core;
+package com.amazonaws.services.iot.client.sample.pubSub;
+
+import com.amazonaws.services.iot.client.AWSIotMessage;
+import com.amazonaws.services.iot.client.AWSIotQos;
+import com.amazonaws.services.iot.client.AWSIotTopic;
 
 /**
- * This exception class is used internally in the library to track retryable
- * events.
+ * This class extends {@link AWSIotTopic} to receive messages from a subscribed
+ * topic.
  */
-public class AwsIotRetryableException extends Exception {
+public class TestTopicListener extends AWSIotTopic {
 
-    private static final long serialVersionUID = 1L;
-
-    public AwsIotRetryableException(String message) {
-        super(message);
+    public TestTopicListener(String topic, AWSIotQos qos) {
+        super(topic, qos);
     }
 
-    public AwsIotRetryableException(Throwable e) {
-        super(e.toString());
+    public void onMessage(AWSIotMessage message) {
+        System.out.println(System.currentTimeMillis() + ": <<< " + message.getStringPayload());
     }
 
 }

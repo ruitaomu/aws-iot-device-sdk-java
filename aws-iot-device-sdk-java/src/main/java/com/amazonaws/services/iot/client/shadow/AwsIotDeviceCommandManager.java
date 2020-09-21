@@ -16,28 +16,16 @@
 package com.amazonaws.services.iot.client.shadow;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.TimerTask;
 
 import com.amazonaws.services.iot.client.AWSIotDeviceErrorCode;
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotTimeoutException;
 import com.amazonaws.services.iot.client.core.AwsIotRuntimeException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import lombok.Getter;
-import lombok.Setter;
+import com.amazonaws.services.iot.client.logging.Logger;
+import com.joshvm.java.util.*;
+import com.joshvm.java.util.Map.Entry;
 
 /**
  * This class manages the commands sent to the shadow. It maintains a list of
@@ -45,8 +33,6 @@ import lombok.Setter;
  * receiving the shadow response for a command, it will notify therefore resume
  * the execution of the caller.
  */
-@Getter
-@Setter
 public class AwsIotDeviceCommandManager {
 
     private static final Logger LOGGER = Logger.getLogger(AwsIotDeviceCommandManager.class.getName());
@@ -55,31 +41,53 @@ public class AwsIotDeviceCommandManager {
     private static final String COMMAND_ID_FIELD = "clientToken";
     private static final String ERROR_CODE_FIELD = "code";
     private static final String ERROR_MESSAGE_FIELD = "message";
-    private static final Map<Command, String> COMMAND_PATHS;
-    private static final Map<CommandAck, String> COMMAND_ACK_PATHS;
+    private static final Map COMMAND_PATHS;
+    private static final Map COMMAND_ACK_PATHS;
     private static final Pattern commandPattern;
     private static final Pattern deltaPattern;
 
-    private final ConcurrentMap<String, AwsIotDeviceCommand> pendingCommands;
+    private final ConcurrentMap pendingCommands;
     private final AbstractAwsIotDevice device;
     private final ObjectMapper objectMapper;
 
-    public static enum Command {
-        GET, UPDATE, DELETE, DELTA
+    public static class Command {
+        public final static Command GET = new Command("GET");
+        public final static Command UPDATE = new Command("UPDATE");
+        public final static Command DELETE = new Command("DELETE");
+        public final static Command DELTA = new Command("DELTA");
+        private Command(String name) {
+        	this.name = name;
+        }
+        private String name;
+        public String name() {return name;}
+        public static Command valueOf(String name) {
+        	if (GET.name.equals(name)) {
+        		return GET;
+        	} else if (UPDATE.name.equals(name)) {
+        		return UPDATE;
+        	} else if (DELETE.name.equals(name)) {
+        		return DELETE;
+        	} else if (DELTA.name.equals(name)) {
+        		return DELTA;
+        	} else {
+        		return null;
+        	}
+        }
     }
 
-    public static enum CommandAck {
-        ACCEPTED, REJECTED
+    public static class CommandAck {
+    	public final static CommandAck ACCEPTED = new CommandAck();
+    	public final static CommandAck REJECTED = new CommandAck();
     }
 
     static {
-        COMMAND_PATHS = new HashMap<Command, String>();
+        COMMAND_PATHS = new HashMap();
         COMMAND_PATHS.put(Command.GET, "/get");
         COMMAND_PATHS.put(Command.UPDATE, "/update");
         COMMAND_PATHS.put(Command.DELETE, "/delete");
         COMMAND_PATHS.put(Command.DELTA, "/update/delta");
 
-        COMMAND_ACK_PATHS = new HashMap<CommandAck, String>();
+        COMMAND_ACK_PATHS = new HashMap();
         COMMAND_ACK_PATHS.put(CommandAck.ACCEPTED, "/accepted");
         COMMAND_ACK_PATHS.put(CommandAck.REJECTED, "/rejected");
 
@@ -88,7 +96,7 @@ public class AwsIotDeviceCommandManager {
     }
 
     public AwsIotDeviceCommandManager(AbstractAwsIotDevice device) {
-        this.pendingCommands = new ConcurrentHashMap<>();
+        this.pendingCommands = new ConcurrentHashMap();
         this.device = device;
         this.objectMapper = new ObjectMapper();
     }
@@ -165,7 +173,7 @@ public class AwsIotDeviceCommandManager {
             return;
         }
 
-        boolean success = response.getTopic().endsWith(COMMAND_ACK_PATHS.get(CommandAck.ACCEPTED));
+        boolean success = response.getTopic().endsWith((String)COMMAND_ACK_PATHS.get(CommandAck.ACCEPTED));
         if (!success
                 && (Command.DELETE.equals(command.getCommand()) && AWSIotDeviceErrorCode.NOT_FOUND.equals(command
                         .getErrorCode()))) {
@@ -201,10 +209,10 @@ public class AwsIotDeviceCommandManager {
             }
         }
 
-        Iterator<Entry<String, AwsIotDeviceCommand>> it = pendingCommands.entrySet().iterator();
+        Iterator it = pendingCommands.entrySet().iterator();
         while (it.hasNext()) {
-            Entry<String, AwsIotDeviceCommand> entry = it.next();
-            AwsIotDeviceCommand deviceCommand = entry.getValue();
+            Entry entry = (Entry)it.next();
+            AwsIotDeviceCommand deviceCommand = (AwsIotDeviceCommand)entry.getValue();
 
             boolean failCommand = false;
             if (command.equals(deviceCommand.getCommand())) {
@@ -225,16 +233,15 @@ public class AwsIotDeviceCommandManager {
     }
 
     public void onDeactivate() {
-        Iterator<Entry<String, AwsIotDeviceCommand>> it = pendingCommands.entrySet().iterator();
+        Iterator it = pendingCommands.entrySet().iterator();
         while (it.hasNext()) {
-            Entry<String, AwsIotDeviceCommand> entry = it.next();
+            Entry entry = (Entry)it.next();
             it.remove();
 
-            final AwsIotDeviceCommand deviceCommand = entry.getValue();
+            final AwsIotDeviceCommand deviceCommand = (AwsIotDeviceCommand)entry.getValue();
             LOGGER.warning("Request was cancelled: " + deviceCommand.getCommand().name() + "/"
                     + deviceCommand.getCommandId());
-            device.getClient().scheduleTask(new Runnable() {
-                @Override
+            device.getClient().scheduleTask(new TimerTask() {
                 public void run() {
                     deviceCommand.onFailure();
                 }
@@ -301,7 +308,7 @@ public class AwsIotDeviceCommandManager {
             }
 
             String commandId = node.textValue();
-            AwsIotDeviceCommand command = pendingCommands.remove(commandId);
+            AwsIotDeviceCommand command = (AwsIotDeviceCommand)pendingCommands.remove(commandId);
             if (command == null) {
                 return null;
             }
