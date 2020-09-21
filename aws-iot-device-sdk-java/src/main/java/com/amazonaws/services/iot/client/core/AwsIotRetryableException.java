@@ -20,9 +20,7 @@ package com.amazonaws.services.iot.client.core;
  * events.
  */
 public class AwsIotRetryableException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
+	
     public AwsIotRetryableException(String message) {
         super(message);
     }

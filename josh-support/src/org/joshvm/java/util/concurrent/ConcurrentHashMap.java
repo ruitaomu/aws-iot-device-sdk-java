@@ -1,14 +1,11 @@
 package org.joshvm.java.util.concurrent;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
 import org.joshvm.java.util.AbstractSet;
 import org.joshvm.java.util.HashMap;
 import org.joshvm.java.util.Iterator;
-import org.joshvm.java.util.Map;
 import org.joshvm.java.util.Set;
-import org.joshvm.java.util.Map.Entry;
 
 public class ConcurrentHashMap extends HashMap implements ConcurrentMap {
 	//////////////////////////////////////////////////////////////

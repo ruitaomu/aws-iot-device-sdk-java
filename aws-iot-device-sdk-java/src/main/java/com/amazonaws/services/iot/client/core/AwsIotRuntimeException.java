@@ -20,8 +20,6 @@ package com.amazonaws.services.iot.client.core;
  */
 public class AwsIotRuntimeException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
-
     public AwsIotRuntimeException(Throwable e) {
         super(e.toString());
     }

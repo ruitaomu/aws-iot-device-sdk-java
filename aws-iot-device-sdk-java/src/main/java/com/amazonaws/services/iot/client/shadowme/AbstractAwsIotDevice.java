@@ -21,7 +21,6 @@ import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotQos;
 import com.amazonaws.services.iot.client.AWSIotTimeoutException;
 import com.amazonaws.services.iot.client.core.AbstractAwsIotClient;
-import com.amazonaws.services.iot.client.logging.Logger;
 
 /**
  * The actual implementation of {@link AWSIotDevice}.

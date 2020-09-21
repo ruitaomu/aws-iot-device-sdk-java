@@ -21,9 +21,6 @@ package com.amazonaws.services.iot.client;
  */
 public class AWSIotException extends Exception {
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 1L;
-
     /**
      * Error code for shadow methods. It's only applicable to exceptions thrown
      * by those shadow method APIs.
@@ -33,7 +30,11 @@ public class AWSIotException extends Exception {
      */
     private AWSIotDeviceErrorCode errorCode;
 
-    /**
+    public AWSIotDeviceErrorCode getErrorCode() {
+		return errorCode;
+	}
+
+	/**
      * Instantiates a new exception object.
      *
      * @param message

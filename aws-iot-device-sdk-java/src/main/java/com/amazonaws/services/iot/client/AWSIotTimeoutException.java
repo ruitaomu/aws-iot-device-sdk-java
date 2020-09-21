@@ -21,9 +21,6 @@ package com.amazonaws.services.iot.client;
  */
 public class AWSIotTimeoutException extends Exception {
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 1L;
-
     /**
      * Instantiates a new exception object.
      *
