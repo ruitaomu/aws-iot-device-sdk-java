@@ -15,12 +15,12 @@
 
 package com.amazonaws.services.iot.client.sample.sampleUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.joshvm.java.util.HashMap;
+import com.joshvm.java.util.Map;
 
 public class CommandArguments {
 
-    private final Map<String, String> arguments = new HashMap<String, String>();
+    private final Map arguments = new HashMap();
 
     private CommandArguments(String[] args) {
         String name = null;
