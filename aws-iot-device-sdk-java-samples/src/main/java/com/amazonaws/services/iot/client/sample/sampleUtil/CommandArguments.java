@@ -15,8 +15,8 @@
 
 package com.amazonaws.services.iot.client.sample.sampleUtil;
 
-import com.joshvm.java.util.HashMap;
-import com.joshvm.java.util.Map;
+import org.joshvm.java.util.HashMap;
+import org.joshvm.java.util.Map;
 
 public class CommandArguments {
 
@@ -60,11 +60,11 @@ public class CommandArguments {
     }
 
     public String get(String name) {
-        return arguments.get(name.toLowerCase());
+        return (String)arguments.get(name.toLowerCase());
     }
 
     public String get(String name, String defaultValue) {
-        String value = arguments.get(name.toLowerCase());
+        String value = (String) arguments.get(name.toLowerCase());
         if (value == null) {
             value = defaultValue;
         }
